@@ -1,0 +1,57 @@
+name: 'ArkForge Trust Proof'
+description: 'Generate a cryptographic timestamp proof for files or commits. Ed25519 signed, RFC 3161 timestamped, publicly verifiable.'
+author: 'ArkForge'
+
+branding:
+  icon: 'shield'
+  color: 'purple'
+
+inputs:
+  file:
+    description: 'Path to file to prove (generates SHA-256 hash). Mutually exclusive with hash input.'
+    required: false
+  hash:
+    description: 'SHA-256 hash to timestamp (if you already computed it). Mutually exclusive with file input.'
+    required: false
+  api-key:
+    description: 'ArkForge Trust Layer API key. Get one free at https://arkforge.fr/trust/v1/keys/free-signup'
+    required: true
+  description:
+    description: 'Optional description attached to the proof (e.g. release name, commit message)'
+    required: false
+    default: ''
+
+outputs:
+  proof-id:
+    description: 'Unique proof identifier (e.g. prf_20260228_...)'
+    value: ${{ steps.prove.outputs.proof_id }}
+  proof-url:
+    description: 'Public verification URL for this proof'
+    value: ${{ steps.prove.outputs.proof_url }}
+  chain-hash:
+    description: 'SHA-256 chain hash binding all proof elements'
+    value: ${{ steps.prove.outputs.chain_hash }}
+  timestamp:
+    description: 'ISO 8601 UTC timestamp of the proof'
+    value: ${{ steps.prove.outputs.timestamp }}
+  file-hash:
+    description: 'SHA-256 hash of the input file (empty if hash input was used)'
+    value: ${{ steps.prove.outputs.file_hash }}
+  badge:
+    description: 'Markdown badge for the proof'
+    value: ${{ steps.prove.outputs.badge }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Generate Trust Proof
+      id: prove
+      shell: bash
+      run: ${{ github.action_path }}/entrypoint.sh
+      env:
+        INPUT_FILE: ${{ inputs.file }}
+        INPUT_HASH: ${{ inputs.hash }}
+        INPUT_API_KEY: ${{ inputs.api-key }}
+        INPUT_DESCRIPTION: ${{ inputs.description }}
+        GITHUB_SHA: ${{ github.sha }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
