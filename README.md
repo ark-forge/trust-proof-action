@@ -23,6 +23,8 @@ curl -X POST https://arkforge.fr/trust/v1/keys/free-signup \
 
 Free tier: 100 proofs/month, no credit card required.
 
+> **CI tip:** For repos with frequent pushes, run the proof only on releases or tagged commits to stay within limits. Use `on: release` or `if: startsWith(github.ref, 'refs/tags/')` to filter. Need more? Buy credits at [arkforge.fr/trust](https://arkforge.fr/trust) — pay-per-proof, no subscription.
+
 ## Inputs
 
 | Input | Required | Description |
@@ -84,6 +86,17 @@ jobs:
     hash: ${{ github.sha }}
     api-key: ${{ secrets.ARKFORGE_API_KEY }}
     description: "Commit on ${{ github.ref_name }}"
+```
+
+### Only on tags (save free tier quota)
+
+```yaml
+- name: Timestamp release
+  if: startsWith(github.ref, 'refs/tags/')
+  uses: ark-forge/trust-proof-action@v1
+  with:
+    file: dist/release.tar.gz
+    api-key: ${{ secrets.ARKFORGE_API_KEY }}
 ```
 
 ### Use the badge

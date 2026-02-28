@@ -5,6 +5,9 @@ set -euo pipefail
 # Generates a cryptographic timestamp proof via ArkForge Trust Layer
 
 API_BASE="https://arkforge.fr/trust"
+MAX_RETRIES=3
+RETRY_DELAY=5
+CURL_TIMEOUT=30
 
 # --- Validate inputs ---
 if [ -z "${INPUT_API_KEY:-}" ]; then
@@ -43,15 +46,21 @@ if [ -z "${DESC}" ]; then
 fi
 DESC="${DESC} | repo:${GITHUB_REPOSITORY:-unknown} commit:${GITHUB_SHA:-unknown} file_hash:sha256:${FILE_HASH}"
 
-# --- Generate proof via Trust Layer proxy ---
+# --- Generate proof via Trust Layer proxy (with retry) ---
 echo "Generating timestamp proof..."
 
-RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${API_BASE}/v1/proxy" \
-  -H "X-Api-Key: ${INPUT_API_KEY}" \
-  -H "X-Agent-Identity: arkforge-trust-proof-action" \
-  -H "X-Agent-Version: 1.0.0" \
-  -H "Content-Type: application/json" \
-  -d "$(cat <<EOF
+ATTEMPT=0
+BODY=""
+HTTP_CODE=""
+while [ "${ATTEMPT}" -lt "${MAX_RETRIES}" ]; do
+  ATTEMPT=$((ATTEMPT + 1))
+
+  RESPONSE=$(curl -s --max-time "${CURL_TIMEOUT}" -w "\n%{http_code}" -X POST "${API_BASE}/v1/proxy" \
+    -H "X-Api-Key: ${INPUT_API_KEY}" \
+    -H "X-Agent-Identity: arkforge-trust-proof-action" \
+    -H "X-Agent-Version: 1.0.0" \
+    -H "Content-Type: application/json" \
+    -d "$(cat <<EOF
 {
   "target": "${API_BASE}/v1/health",
   "payload": {},
@@ -59,13 +68,25 @@ RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${API_BASE}/v1/proxy" \
   "description": "${DESC}"
 }
 EOF
-)")
+)" 2>/dev/null) || true
 
-HTTP_CODE=$(echo "${RESPONSE}" | tail -1)
-BODY=$(echo "${RESPONSE}" | sed '$d')
+  HTTP_CODE=$(echo "${RESPONSE}" | tail -1)
+  BODY=$(echo "${RESPONSE}" | sed '$d')
 
-if [ "${HTTP_CODE}" -ge 400 ]; then
-  echo "::error::Trust Layer returned HTTP ${HTTP_CODE}: ${BODY}"
+  # Success or client error (4xx) — don't retry
+  if [ -n "${HTTP_CODE}" ] && [ "${HTTP_CODE}" -ge 200 ] && [ "${HTTP_CODE}" -lt 500 ]; then
+    break
+  fi
+
+  # Server error or network failure — retry
+  if [ "${ATTEMPT}" -lt "${MAX_RETRIES}" ]; then
+    echo "::warning::Attempt ${ATTEMPT}/${MAX_RETRIES} failed (HTTP ${HTTP_CODE:-timeout}). Retrying in ${RETRY_DELAY}s..."
+    sleep "${RETRY_DELAY}"
+  fi
+done
+
+if [ -z "${HTTP_CODE}" ] || [ "${HTTP_CODE}" -ge 400 ]; then
+  echo "::error::Trust Layer returned HTTP ${HTTP_CODE:-timeout} after ${MAX_RETRIES} attempts: ${BODY}"
   exit 1
 fi
 
