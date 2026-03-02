@@ -120,9 +120,8 @@ Each proof contains:
 - **SHA-256 hash chain** — binds request, response, payment, and timestamp into one verifiable seal
 - **Ed25519 signature** — signed by ArkForge's key ([verify](https://arkforge.fr/trust/v1/pubkey))
 - **RFC 3161 timestamp** — independent timestamp authority (FreeTSA.org)
-- **Archive.org snapshot** — third-party archival witness
 
-Three independent witnesses. One curl.
+Two independent witnesses. One curl.
 
 ## Verification
 
