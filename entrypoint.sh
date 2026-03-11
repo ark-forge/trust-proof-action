@@ -4,7 +4,7 @@ set -euo pipefail
 # ArkForge Trust Proof — GitHub Action entrypoint
 # Generates a cryptographic timestamp proof via ArkForge Trust Layer
 
-API_BASE="https://arkforge.fr/trust"
+API_BASE="https://trust.arkforge.tech"
 MAX_RETRIES=3
 RETRY_DELAY=5
 CURL_TIMEOUT=30

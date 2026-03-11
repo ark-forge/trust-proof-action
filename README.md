@@ -16,14 +16,14 @@ Prove that a file, build artifact, or release existed at a specific point in tim
 ## Get a free API key
 
 ```bash
-curl -X POST https://arkforge.fr/trust/v1/keys/free-signup \
+curl -X POST https://trust.arkforge.tech/v1/keys/free-signup \
   -H "Content-Type: application/json" \
   -d '{"email": "you@example.com"}'
 ```
 
 Free tier: 100 proofs/month, no credit card required.
 
-> **CI tip:** For repos with frequent pushes, run the proof only on releases or tagged commits to stay within limits. Use `on: release` or `if: startsWith(github.ref, 'refs/tags/')` to filter. Need more? Buy credits at [arkforge.fr/trust](https://arkforge.fr/trust) — pay-per-proof, no subscription.
+> **CI tip:** For repos with frequent pushes, run the proof only on releases or tagged commits to stay within limits. Use `on: release` or `if: startsWith(github.ref, 'refs/tags/')` to filter. Need more? Buy credits at [arkforge.tech/trust](https://arkforge.tech/trust) — pay-per-proof, no subscription.
 
 ## Inputs
 
@@ -118,7 +118,7 @@ jobs:
 Each proof contains:
 
 - **SHA-256 hash chain** — binds request, response, payment, and timestamp into one verifiable seal
-- **Ed25519 signature** — signed by ArkForge's key ([verify](https://arkforge.fr/trust/v1/pubkey))
+- **Ed25519 signature** — signed by ArkForge's key ([verify](https://arkforge.tech/trust/v1/pubkey))
 - **RFC 3161 timestamp** — independent timestamp authority (FreeTSA.org)
 
 Two independent witnesses. One curl.
@@ -128,13 +128,13 @@ Two independent witnesses. One curl.
 Every proof has a public URL. Open it in a browser or fetch the JSON:
 
 ```bash
-curl https://arkforge.fr/trust/v1/proof/prf_20260228_123456_abc123
+curl https://arkforge.tech/trust/v1/proof/prf_20260228_123456_abc123
 ```
 
 Download the RFC 3161 timestamp for offline verification:
 
 ```bash
-curl https://arkforge.fr/trust/v1/proof/prf_20260228_123456_abc123/tsr -o proof.tsr
+curl https://arkforge.tech/trust/v1/proof/prf_20260228_123456_abc123/tsr -o proof.tsr
 ```
 
 ## License

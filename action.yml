@@ -14,7 +14,7 @@ inputs:
     description: 'SHA-256 hash to timestamp (if you already computed it). Mutually exclusive with file input.'
     required: false
   api-key:
-    description: 'ArkForge Trust Layer API key. Get one free at https://arkforge.fr/trust/v1/keys/free-signup'
+    description: 'ArkForge Trust Layer API key. Get one free at https://trust.arkforge.tech/v1/keys/free-signup'
     required: true
   description:
     description: 'Optional description attached to the proof (e.g. release name, commit message)'
