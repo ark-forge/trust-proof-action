@@ -21,7 +21,7 @@ curl -X POST https://trust.arkforge.tech/v1/keys/free-signup \
   -d '{"email": "you@example.com"}'
 ```
 
-Free tier: 100 proofs/month, no credit card required.
+Free tier: 500 proofs/month, no credit card required.
 
 > **CI tip:** For repos with frequent pushes, run the proof only on releases or tagged commits to stay within limits. Use `on: release` or `if: startsWith(github.ref, 'refs/tags/')` to filter. Need more? Buy credits at [arkforge.tech/trust](https://arkforge.tech/trust) — pay-per-proof, no subscription.
 
